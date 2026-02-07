@@ -652,8 +652,8 @@
             
             addMessage(
                 `Now send to <strong>${wallet.address}</strong>:<br><br>
-                • Real ETH: 0.002 ETH minimum (for mint + gas)<br>
-                • Mint price: <strong>0.0005 ETH</strong> per punk (~$1.50)<br>
+                • Real ETH: 0.001 ETH minimum (for mint + gas)<br>
+                • Mint price: <strong>0.0005 ETH</strong> per punk ($1)<br>
                 • Gas fees: ~$2-5 per transaction<br>
                 • Max: <strong>50 punks</strong> per wallet<br><br>
                 Once funded, say <strong>"ready"</strong> to continue.`,
@@ -692,13 +692,13 @@
                 const remaining = MAX_PER_WALLET - mintedCount;
                 hideTyping();
                 
-                if (parseFloat(ethBalance) >= 0.002) {
+                if (parseFloat(ethBalance) >= 0.001) {
                     addMessage(`<span class="success-message">✓ FUNDED</span><br><br>Balance: ${ethBalance} ETH<br>Already minted: ${mintedCount}/${MAX_PER_WALLET}<br>Can mint: ${remaining} more<br><br>Tell me token ID(s). Examples:<br>• Single: <strong>"420"</strong><br>• Multiple: <strong>"1,2,3,4,5"</strong><br>• Random: <strong>"random 5"</strong> (mints 5 random)`);
                     state.phase = 'funded';
                     state.userBalance = mintedCount;
                     updateStatus('READY', true);
                 } else {
-                    addMessage(`Balance: ${ethBalance} ETH<br><br>Need at least 0.002 ETH to cover mint price + gas fees.<br><br>Send more ETH to your wallet address, then say <strong>"check balance"</strong> again.`);
+                    addMessage(`Balance: ${ethBalance} ETH<br><br>Need at least 0.001 ETH to cover mint price + gas fees.<br><br>Send more ETH to your wallet address, then say <strong>"check balance"</strong> again.`);
                 }
             } catch (error) {
                 hideTyping();
@@ -991,7 +991,7 @@
                     3. Try a different browser<br>
                     4. Check internet connection`);
             } else {
-                addMessage(`<div class="warning-box">🔥 ETHEREUM MAINNET - REAL NFTs<br><br>Price: 0.0005 ETH per punk (~$1.50)</div>Yo. I'm the Pixels AI.<br><br>I'll create a wallet for you, guide you through funding with real ETH, then mint your punks.<br><br>Ready to start? Say <strong>'yes'</strong>.`);
+                addMessage(`<div class="warning-box">🔥 ETHEREUM MAINNET - REAL NFTs<br><br>Price: 0.0005 ETH per punk ($1)</div>Yo. I'm the Pixels AI.<br><br>I'll create a wallet for you, guide you through funding with real ETH, then mint your punks.<br><br>Ready to start? Say <strong>'yes'</strong>.`);
             }
             
             console.log('Initialization complete');
