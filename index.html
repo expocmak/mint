@@ -3,999 +3,576 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXELS - AI MINT</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>PIXELS - MINT</title>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         :root {
             --punk-bg: #638596;
             --punk-orange: #ff8800;
             --punk-cyan: #00ddff;
             --punk-black: #000;
             --punk-white: #e8e8e0;
-            --punk-grey: #888888;
             --punk-green: #44ff44;
         }
-
+        
         body {
             font-family: 'Courier Prime', monospace;
             background: var(--punk-bg);
             color: var(--punk-black);
-            line-height: 1.5;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Pixelated cursor for general elements */
-        body, .chat-container, .message {
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect width="16" height="16" fill="%23000"/><rect x="2" y="2" width="12" height="12" fill="%23fff"/></svg>') 8 8, auto;
-        }
-        
-        /* Standard cursor for interactive elements */
-        input, button, a, .action-btn, .copy-btn {
-            cursor: pointer !important;
-        }
-        
-        input[type="text"] {
-            cursor: text !important;
-        }
-
-        .container {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        header {
-            padding: 20px;
-            border-bottom: 4px solid var(--punk-black);
-            background: var(--punk-white);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1.5rem;
-            color: var(--punk-black);
-            text-shadow: 
-                2px 2px 0 var(--punk-orange),
-                4px 4px 0 var(--punk-cyan);
-        }
-
-        .status-badge {
-            font-size: 0.7rem;
-            padding: 8px 15px;
-            background: var(--punk-grey);
-            border: 3px solid var(--punk-black);
-            font-family: 'Press Start 2P', monospace;
-        }
-
-        .status-badge.active {
-            background: var(--punk-green);
-        }
-
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background: var(--punk-bg);
-        }
-
-        .message {
-            display: flex;
-            gap: 10px;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.ai {
-            align-self: flex-start;
-        }
-
-        .message.user {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--punk-black);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
-            flex-shrink: 0;
+            padding: 20px;
         }
-
-        .message.ai .message-avatar {
-            background: var(--punk-orange);
-        }
-
-        .message.user .message-avatar {
-            background: var(--punk-cyan);
-        }
-
-        .message-content {
-            max-width: 70%;
-            padding: 15px;
-            border: 3px solid var(--punk-black);
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
             background: var(--punk-white);
+            border: 4px solid var(--punk-black);
+            padding: 40px;
         }
-
-        .message-text {
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
-        .message-text strong {
-            color: var(--punk-orange);
-        }
-
-        .code-block {
-            background: var(--punk-black);
-            color: var(--punk-green);
-            padding: 12px;
-            margin: 10px 0;
-            font-family: 'Courier Prime', monospace;
-            font-size: 0.85rem;
-            border: 2px solid var(--punk-orange);
-            overflow-x: auto;
-            word-break: break-all;
-        }
-
-        .warning-box {
-            background: var(--punk-orange);
-            border: 3px solid var(--punk-black);
-            padding: 15px;
-            margin: 10px 0;
-            font-weight: 700;
-        }
-
-        .punk-preview {
-            margin: 10px 0;
-            padding: 15px;
-            background: var(--punk-bg);
-            border: 3px solid var(--punk-black);
-            text-align: center;
-        }
-
-        .punk-preview .token-display {
+        
+        h1 {
             font-family: 'Press Start 2P', monospace;
             font-size: 2rem;
             color: var(--punk-black);
-            padding: 20px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            padding: 8px 15px;
-            background: var(--punk-orange);
-            border: 3px solid var(--punk-black);
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            transition: all 0.1s;
-            cursor: pointer;
-        }
-
-        .action-btn:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 2px 2px 0 var(--punk-black);
-        }
-
-        .action-btn.confirm {
-            background: var(--punk-green);
-        }
-
-        .action-btn.secondary {
-            background: var(--punk-white);
-        }
-
-        .typing-indicator {
-            display: none;
-            padding: 15px;
-            background: var(--punk-white);
-            border: 3px solid var(--punk-black);
-            max-width: 100px;
-            align-self: flex-start;
-        }
-
-        .typing-indicator.show {
-            display: block;
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 5px;
-        }
-
-        .typing-dots span {
-            width: 8px;
-            height: 8px;
-            background: var(--punk-black);
-            animation: blink 1.4s infinite;
-        }
-
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes blink {
-            0%, 60%, 100% { opacity: 0.3; }
-            30% { opacity: 1; }
-        }
-
-        .input-container {
-            padding: 20px;
-            border-top: 4px solid var(--punk-black);
-            background: var(--punk-white);
-            position: relative;
-            z-index: 100;
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 10px;
-        }
-
-        #userInput {
-            flex: 1;
-            padding: 15px;
-            border: 3px solid var(--punk-black);
-            background: var(--punk-bg);
-            font-family: 'Courier Prime', monospace;
-            font-size: 1rem;
-            color: var(--punk-black);
-            font-weight: 700;
-            cursor: text !important;
-        }
-
-        #userInput:focus {
-            outline: none;
-            box-shadow: inset 3px 3px 0 var(--punk-black);
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 var(--punk-orange);
         }
         
-        #userInput::placeholder {
-            color: var(--punk-grey);
+        .subtitle {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            padding: 10px;
+            background: var(--punk-orange);
+            border: 2px solid var(--punk-black);
+            font-weight: 700;
         }
-
-        #sendBtn {
-            padding: 15px 25px;
+        
+        .status {
+            padding: 15px;
+            background: var(--punk-cyan);
+            border: 3px solid var(--punk-black);
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        .status.success {
+            background: var(--punk-green);
+        }
+        
+        .status.error {
+            background: #ff0044;
+            color: white;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid var(--punk-black);
+            font-family: 'Courier Prime', monospace;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
             background: var(--punk-orange);
             border: 3px solid var(--punk-black);
             font-family: 'Press Start 2P', monospace;
             font-size: 0.9rem;
-            transition: all 0.1s;
-            cursor: pointer !important;
+            cursor: pointer;
+            margin-bottom: 10px;
+            color: var(--punk-black);
         }
-
-        #sendBtn:hover:not(:disabled) {
+        
+        button:hover:not(:disabled) {
             transform: translate(-3px, -3px);
             box-shadow: 3px 3px 0 var(--punk-black);
-            cursor: pointer !important;
         }
-
-        #sendBtn:disabled {
+        
+        button:disabled {
             opacity: 0.5;
-            cursor: not-allowed !important;
+            cursor: not-allowed;
         }
-
-        .error-message {
-            color: #ff0044;
-            font-weight: 700;
+        
+        button.secondary {
+            background: var(--punk-white);
         }
-
-        .success-message {
-            color: var(--punk-green);
-            font-weight: 700;
+        
+        button.wallet-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.8rem;
         }
-
-        @media (max-width: 768px) {
-            .message-content {
-                max-width: 85%;
-            }
-            .punk-preview {
-                flex-direction: column;
-            }
+        
+        .wallet-icon {
+            width: 24px;
+            height: 24px;
         }
-
-        .copy-btn {
-            display: inline-block;
-            padding: 5px 10px;
-            background: var(--punk-cyan);
+        
+        .info {
+            font-size: 0.85rem;
+            padding: 15px;
+            background: var(--punk-bg);
             border: 2px solid var(--punk-black);
-            font-size: 0.75rem;
-            margin-left: 10px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        
+        .info a {
+            color: var(--punk-orange);
+            text-decoration: none;
+            font-weight: 700;
+        }
+        
+        .info a:hover {
+            text-decoration: underline;
+        }
+        
+        .warning {
+            background: #ffdd00;
+            padding: 15px;
+            border: 3px solid var(--punk-black);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .wallet-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .wallet-modal.show {
+            display: flex;
+        }
+        
+        .wallet-modal-content {
+            background: var(--punk-white);
+            border: 4px solid var(--punk-black);
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .wallet-modal h2 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .close-modal {
+            float: right;
+            font-size: 1.5rem;
             cursor: pointer;
             font-weight: 700;
-        }
-
-        .copy-btn:hover {
-            background: var(--punk-orange);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="logo">PIXELS AI</div>
-            <div class="status-badge active" id="statusBadge">MAINNET</div>
-        </header>
-
-        <div class="chat-container" id="chatContainer"></div>
-
-        <div class="typing-indicator" id="typingIndicator">
-            <div class="typing-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+        <h1>PIXELS</h1>
+        <div class="subtitle">🔥 ETHEREUM MAINNET</div>
+        
+        <div class="warning">
+            ⚠️ REAL MONEY - REAL NFTs<br>
+            This is on Ethereum mainnet. Transactions cost real ETH.
         </div>
-
-        <div class="input-container">
-            <div class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="userInput" 
-                    placeholder="Type your message..."
-                    onkeydown="if(event.key==='Enter'){event.preventDefault();sendMessage();}"
-                >
-                <button id="sendBtn" onclick="sendMessage();">SEND</button>
+        
+        <div class="status" id="status">Connect your wallet to start</div>
+        
+        <div id="app">
+            <div id="connectSection">
+                <button onclick="showWalletModal()" class="wallet-btn">
+                    CONNECT WALLET
+                </button>
+            </div>
+            
+            <div id="mintSection" style="display: none;">
+                <input type="text" id="tokenInput" placeholder="Enter token ID (0-9999) or multiple: 1,2,3">
+                <button onclick="mint()" id="mintBtn">MINT (0.0005 ETH each)</button>
+                <button onclick="mintRandom()" class="secondary">MINT RANDOM</button>
+                <button onclick="disconnect()" class="secondary">DISCONNECT</button>
+            </div>
+            
+            <div class="info">
+                <strong>Contract (Verified):</strong><br>
+                <a href="https://etherscan.io/address/0x1D2b6046585602E754414f883e2989a68A0D049f" target="_blank">
+                    0x1D2b...D049f
+                </a><br><br>
+                
+                <strong>Price:</strong> 0.0005 ETH per punk ($1)<br>
+                <strong>Max Per Wallet:</strong> 50 punks<br>
+                <strong>Supply:</strong> 10,000 total<br>
+                <strong>Network:</strong> Ethereum Mainnet<br><br>
+                
+                <strong>Supported Wallets:</strong><br>
+                • MetaMask<br>
+                • Rainbow<br>
+                • Trust Wallet<br>
+                • Coinbase Wallet<br>
+                • Any WalletConnect wallet
             </div>
         </div>
     </div>
+    
+    <!-- Wallet Selection Modal -->
+    <div class="wallet-modal" id="walletModal">
+        <div class="wallet-modal-content">
+            <span class="close-modal" onclick="hideWalletModal()">×</span>
+            <h2>Choose Wallet</h2>
+            <button onclick="connectMetaMask()" class="wallet-btn">
+                🦊 METAMASK
+            </button>
+            <button onclick="connectWalletConnect()" class="wallet-btn">
+                🔗 WALLETCONNECT
+            </button>
+            <button onclick="connectCoinbase()" class="wallet-btn">
+                💙 COINBASE WALLET
+            </button>
+        </div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
     <script>
-        // CONTRACT CONFIGURATION
-        const DEMO_MODE = false; // Real mainnet contract
-        
-        const CONTRACT_ADDRESS = "0x1D2b6046585602E754414f883e2989a68A0D049f"; // Mainnet
+        const CONTRACT_ADDRESS = "0x1D2b6046585602E754414f883e2989a68A0D049f";
         const CONTRACT_ABI = [
             "function mint(uint256 tokenId) public payable",
             "function mintBatch(uint256[] memory tokenIds) public payable",
             "function isAvailable(uint256 tokenId) public view returns (bool)",
             "function balanceOf(address owner) public view returns (uint256)",
-            "function totalSupply() public view returns (uint256)",
-            "function MAX_PER_WALLET() public view returns (uint256)"
+            "function totalSupply() public view returns (uint256)"
         ];
-        
-        const MINT_PRICE = "0.0005"; // 0.0005 ETH per NFT (~$1)
+        const MINT_PRICE = "0.0005";
         const MAX_PER_WALLET = 50;
-        const MAX_BATCH_SIZE = 50;
         
-        // Network: Ethereum Mainnet
-        const CHAIN_ID = 1;
-        // Multiple RPC endpoints for fallback
-        const RPC_URLS = [
-            "https://eth.llamarpc.com",
-            "https://rpc.ankr.com/eth",
-            "https://cloudflare-eth.com",
-            "https://ethereum.publicnode.com"
-        ];
-        const EXPLORER = "https://etherscan.io";
+        let provider, signer, contract, userAddress, web3Provider;
         
-        // Demo state (simulated blockchain)
-        let demoState = {
-            mintedTokens: new Set([42, 69, 420, 1337, 9999]), // Pre-minted tokens for demo
-            userMintCount: 0
-        };
-
-        // State
-        let state = {
-            phase: 'intro', // intro, wallet_created, funded, browsing, confirming, minting
-            wallet: null,
-            provider: null,
-            contract: null,
-            selectedTokenIds: [], // Changed to array for batch minting
-            userBalance: 0
-        };
+        function showWalletModal() {
+            document.getElementById('walletModal').classList.add('show');
+        }
         
-        // Try to connect to RPC with fallbacks
-        async function createProvider() {
-            for (let i = 0; i < RPC_URLS.length; i++) {
-                const rpcUrl = RPC_URLS[i];
-                console.log(`Trying RPC ${i + 1}/${RPC_URLS.length}: ${rpcUrl}`);
+        function hideWalletModal() {
+            document.getElementById('walletModal').classList.remove('show');
+        }
+        
+        async function connectMetaMask() {
+            if (!window.ethereum) {
+                updateStatus("Install MetaMask first!", true);
+                window.open("https://metamask.io/download/", "_blank");
+                return;
+            }
+            
+            try {
+                hideWalletModal();
+                updateStatus("Connecting to MetaMask...");
                 
-                try {
-                    // Simple connection without network detection
-                    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-                    
-                    // Test with a simple call (with timeout)
-                    const blockNumberPromise = provider.getBlockNumber();
-                    const timeoutPromise = new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error('Timeout')), 5000)
-                    );
-                    
-                    await Promise.race([blockNumberPromise, timeoutPromise]);
-                    
-                    console.log(`✓ Connected to RPC: ${rpcUrl}`);
-                    return provider;
-                } catch (error) {
-                    console.log(`✗ Failed RPC ${i + 1}: ${error.message}`);
-                    if (i === RPC_URLS.length - 1) {
-                        throw new Error('All RPC endpoints failed');
-                    }
-                }
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                
+                await initializeWallet();
+            } catch (error) {
+                console.error(error);
+                updateStatus("MetaMask connection failed: " + error.message, true);
             }
         }
         
-        // Mock contract for demo mode
-        const mockContract = {
-            async isAvailable(tokenId) {
-                await delay(300);
-                return !demoState.mintedTokens.has(tokenId);
-            },
-            async balanceOf(address) {
-                await delay(200);
-                return { toNumber: () => demoState.userMintCount };
-            },
-            async mint(tokenId, options) {
-                await delay(1500);
-                demoState.mintedTokens.add(tokenId);
-                demoState.userMintCount++;
-                return {
-                    hash: '0x' + Math.random().toString(16).substr(2, 64),
-                    wait: async () => {
-                        await delay(2000);
-                        return { status: 1 };
-                    }
-                };
-            },
-            async mintBatch(tokenIds, options) {
-                await delay(2000);
-                tokenIds.forEach(id => demoState.mintedTokens.add(id));
-                demoState.userMintCount += tokenIds.length;
-                return {
-                    hash: '0x' + Math.random().toString(16).substr(2, 64),
-                    wait: async () => {
-                        await delay(3000);
-                        return { status: 1 };
-                    }
-                };
-            }
-        };
-
-        // Punk SVG generation
-        const skinColors = ["88ff88", "aaaaaa", "8b6f47", "f0c0a0", "d0a080", "a07050", "88ddff", "ffaacc"];
-        const bgHex = ["00ddff", "0066ff", "ffdd00", "888888", "ff8800", "8844ff", "ff0044", "ff88cc", "44ff44", "e8d5b0"];
-        const hairHex = ["000000", "1a1a1a", "4a3728", "ffd966", "aa3333", "8844aa", "4488ff", "44aa44", "ff66cc", "888888", "eeeeee", "ff8833"];
-
-        function generatePunkSVG(tokenId) {
-            const bgIdx = tokenId % 10;
-            const skinIdx = (tokenId * 7) % 8;
-            const hairIdx = (tokenId * 11) % 12;
-            
-            const bg = bgHex[bgIdx];
-            const skin = skinColors[skinIdx];
-            const hair = hairHex[hairIdx];
-            
-            return `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
-                    <rect width="24" height="24" fill="#${bg}"/>
-                    <rect x="8" y="19" width="8" height="5" fill="#4488ff"/>
-                    <rect x="6" y="5" width="12" height="14" fill="#${skin}"/>
-                    <rect x="8" y="9" width="3" height="4" fill="#000"/>
-                    <rect x="13" y="9" width="3" height="4" fill="#000"/>
-                    <rect x="8" y="17" width="8" height="1" fill="#000"/>
-                    <rect x="7" y="3" width="10" height="2" fill="#${hair}"/>
-                </svg>
-            `;
-        }
-
-        // Message handling
-        function addMessage(text, isUser = false, options = {}) {
-            const chatContainer = document.getElementById('chatContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
-            
-            let contentHTML = `
-                <div class="message-avatar">${isUser ? 'U' : 'AI'}</div>
-                <div class="message-content">
-                    <div class="message-text">${text}</div>
-            `;
-            
-            if (options.tokenDisplay) {
-                contentHTML += `
-                    <div class="punk-preview">
-                        <div class="token-display">#${options.tokenDisplay}</div>
-                    </div>
-                `;
-            }
-            
-            if (options.actions) {
-                contentHTML += '<div class="action-buttons">';
-                options.actions.forEach(action => {
-                    contentHTML += `<button class="action-btn ${action.class || ''}" onclick="${action.onclick}">${action.label}</button>`;
+        async function connectWalletConnect() {
+            try {
+                hideWalletModal();
+                updateStatus("Opening WalletConnect...");
+                
+                web3Provider = new WalletConnectProvider.default({
+                    rpc: {
+                        1: "https://cloudflare-eth.com" // Fallback RPC
+                    },
+                    chainId: 1,
+                    qrcode: true
                 });
-                contentHTML += '</div>';
-            }
-            
-            contentHTML += '</div>';
-            messageDiv.innerHTML = contentHTML;
-            chatContainer.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        function showTyping() {
-            document.getElementById('typingIndicator').classList.add('show');
-            scrollToBottom();
-        }
-
-        function hideTyping() {
-            document.getElementById('typingIndicator').classList.remove('show');
-        }
-
-        function scrollToBottom() {
-            const chatContainer = document.getElementById('chatContainer');
-            setTimeout(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 100);
-        }
-
-        function delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        function updateStatus(text, active = false) {
-            const badge = document.getElementById('statusBadge');
-            badge.textContent = text;
-            if (active) {
-                badge.classList.add('active');
-            } else {
-                badge.classList.remove('active');
-            }
-        }
-
-        function copyToClipboard(text, label) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert(`${label} copied!`);
-            });
-        }
-
-        // Create wallet
-        async function createWallet() {
-            showTyping();
-            await delay(1500);
-            hideTyping();
-            
-            let wallet;
-            
-            // Wait a bit more for ethers to load
-            let attempts = 0;
-            while (typeof ethers === 'undefined' && attempts < 10) {
-                await delay(500);
-                attempts++;
-            }
-            
-            // Check if ethers.js loaded
-            if (typeof ethers === 'undefined') {
-                addMessage(`<span class="error-message">Error: Ethers.js library failed to load.</span><br><br>
-                    Please try:<br>
-                    1. Check your internet connection<br>
-                    2. Refresh the page<br>
-                    3. Try a different browser<br>
-                    4. Disable ad blockers<br><br>
-                    If issue persists, the CDN might be blocked.`);
-                return;
-            }
-            
-            // Generate real wallet
-            wallet = ethers.Wallet.createRandom();
-            state.wallet = wallet;
-            
-            // Try to connect to provider
-            try {
-                addMessage("Connecting to Ethereum network...");
-                state.provider = await createProvider();
                 
-                const connectedWallet = wallet.connect(state.provider);
-                state.contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, connectedWallet);
+                await web3Provider.enable();
+                provider = new ethers.providers.Web3Provider(web3Provider);
                 
-                console.log('✓ Wallet connected successfully');
+                await initializeWallet();
+                
+                // Listen for disconnect
+                web3Provider.on("disconnect", (code, reason) => {
+                    console.log("WalletConnect disconnected", code, reason);
+                    disconnect();
+                });
+                
             } catch (error) {
-                console.error('Provider connection error:', error);
-                addMessage(`<span class="error-message">Network connection failed.</span><br><br>
-                    All RPC endpoints are unreachable. This could mean:<br>
-                    • Your internet connection is down<br>
-                    • Firewall is blocking connections<br>
-                    • RPCs are temporarily down<br><br>
-                    Please:<br>
-                    1. Check your internet connection<br>
-                    2. Try a different network/WiFi<br>
-                    3. Disable VPN if using one<br>
-                    4. Try again in a few minutes`);
-                return;
-            }
-            
-            addMessage(`
-                <div class="warning-box">🔥 ETHEREUM MAINNET - Real NFTs!</div>
-                <span class="success-message">✓ WALLET CREATED</span><br><br>
-                <strong>Address:</strong><br>
-                <div class="code-block">${wallet.address}<button class="copy-btn" onclick="copyToClipboard('${wallet.address}', 'Address')">COPY</button></div>
-                <strong>Private Key:</strong><br>
-                <div class="code-block">${wallet.privateKey}<button class="copy-btn" onclick="copyToClipboard('${wallet.privateKey}', 'Private Key')">COPY</button></div>
-                <div class="warning-box">⚠️ SAVE YOUR PRIVATE KEY! You need it to access this wallet.</div>
-            `);
-            
-            await delay(1000);
-            
-            addMessage(
-                `Now send to <strong>${wallet.address}</strong>:<br><br>
-                • Real ETH: 0.001 ETH minimum (for mint + gas)<br>
-                • Mint price: <strong>0.0005 ETH</strong> per punk ($1)<br>
-                • Gas fees: ~$2-5 per transaction<br>
-                • Max: <strong>50 punks</strong> per wallet<br><br>
-                Once funded, say <strong>"ready"</strong> to continue.`,
-                false
-            );
-            
-            state.phase = 'wallet_created';
-            updateStatus('AWAITING FUNDS');
-        }
-
-        // Check balance
-        async function checkBalance() {
-            showTyping();
-            try {
-                // Try to get balance with retry
-                let balance;
-                let attempts = 0;
-                
-                while (attempts < 3) {
-                    try {
-                        balance = await state.provider.getBalance(state.wallet.address);
-                        break;
-                    } catch (err) {
-                        attempts++;
-                        if (attempts >= 3) throw err;
-                        await delay(1000);
-                    }
-                }
-                
-                const ethBalance = ethers.utils.formatEther(balance);
-                
-                // Check how many minted already
-                const balanceResult = await state.contract.balanceOf(state.wallet.address);
-                const mintedCount = balanceResult.toNumber();
-                
-                const remaining = MAX_PER_WALLET - mintedCount;
-                hideTyping();
-                
-                if (parseFloat(ethBalance) >= 0.001) {
-                    addMessage(`<span class="success-message">✓ FUNDED</span><br><br>Balance: ${ethBalance} ETH<br>Already minted: ${mintedCount}/${MAX_PER_WALLET}<br>Can mint: ${remaining} more<br><br>Tell me token ID(s). Examples:<br>• Single: <strong>"420"</strong><br>• Multiple: <strong>"1,2,3,4,5"</strong><br>• Random: <strong>"random 5"</strong> (mints 5 random)`);
-                    state.phase = 'funded';
-                    state.userBalance = mintedCount;
-                    updateStatus('READY', true);
+                console.error(error);
+                if (error.message.includes("User closed modal")) {
+                    updateStatus("Connection cancelled");
                 } else {
-                    addMessage(`Balance: ${ethBalance} ETH<br><br>Need at least 0.001 ETH to cover mint price + gas fees.<br><br>Send more ETH to your wallet address, then say <strong>"check balance"</strong> again.`);
+                    updateStatus("WalletConnect failed: " + error.message, true);
                 }
-            } catch (error) {
-                hideTyping();
-                console.error('Balance check error:', error);
-                addMessage(`<span class="error-message">Error checking balance: ${error.message}</span><br><br>This might mean:<br>• RPC connection issue<br>• Internet connection problem<br>• Wallet not yet indexed<br><br>Try saying <strong>"check balance"</strong> again in a moment.`);
             }
         }
-
-        // Show punk preview (supports batch)
-        async function showPunkPreview(tokenIds) {
-            showTyping();
+        
+        async function connectCoinbase() {
             try {
-                // Check if exceeds max per wallet
-                const currentBalance = await state.contract.balanceOf(state.wallet.address);
-                const remaining = MAX_PER_WALLET - currentBalance.toNumber();
+                hideWalletModal();
+                updateStatus("Opening Coinbase Wallet...");
                 
-                if (tokenIds.length > remaining) {
-                    hideTyping();
-                    addMessage(`<span class="error-message">Can only mint ${remaining} more (${currentBalance}/${MAX_PER_WALLET} already minted)</span>`);
-                    return;
+                if (window.ethereum?.isCoinbaseWallet) {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await initializeWallet();
+                } else {
+                    // Fallback to WalletConnect for mobile
+                    await connectWalletConnect();
                 }
+            } catch (error) {
+                console.error(error);
+                updateStatus("Coinbase Wallet connection failed: " + error.message, true);
+            }
+        }
+        
+        async function initializeWallet() {
+            try {
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
                 
-                if (tokenIds.length > MAX_BATCH_SIZE) {
-                    hideTyping();
-                    addMessage(`<span class="error-message">Max ${MAX_BATCH_SIZE} per transaction</span>`);
-                    return;
-                }
-                
-                // Check availability for all tokens
-                const availabilityChecks = await Promise.all(
-                    tokenIds.map(id => state.contract.isAvailable(id))
-                );
-                
-                const unavailable = tokenIds.filter((id, i) => !availabilityChecks[i]);
-                
-                if (unavailable.length > 0) {
-                    hideTyping();
-                    addMessage(`<span class="error-message">Already minted: ${unavailable.join(', ')}</span><br><br>Try different IDs.`);
-                    return;
-                }
-                
-                hideTyping();
-                
-                state.selectedTokenIds = tokenIds;
-                state.phase = 'confirming';
-                
-                const totalCost = (parseFloat(MINT_PRICE) * tokenIds.length).toFixed(4);
-                const isBatch = tokenIds.length > 1;
-                
-                let message = isBatch 
-                    ? `Ready to mint <strong>${tokenIds.length} punks</strong>?<br><br>IDs: ${tokenIds.join(', ')}<br>Total: <strong>${totalCost} ETH</strong>` 
-                    : `Ready to mint <strong>Punk #${tokenIds[0]}</strong>?<br><br>Price: <strong>${MINT_PRICE} ETH</strong>`;
-                
-                addMessage(
-                    message,
-                    false,
-                    {
-                        tokenDisplay: tokenIds[0], // Show first token ID
-                        actions: [
-                            { label: 'MINT', onclick: 'startMint()', class: 'confirm' },
-                            { label: 'CANCEL', onclick: 'browseDifferent()', class: 'secondary' }
-                        ]
+                // Check network (skip for WalletConnect as it handles this)
+                if (window.ethereum && !web3Provider) {
+                    const network = await provider.getNetwork();
+                    if (network.chainId !== 1) {
+                        updateStatus("Switch to Ethereum Mainnet!", true);
+                        
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: '0x1' }],
+                            });
+                            // Reload after network switch
+                            window.location.reload();
+                            return;
+                        } catch (switchError) {
+                            updateStatus("Please switch to Ethereum Mainnet", true);
+                            return;
+                        }
                     }
-                );
+                }
+                
+                // Initialize contract
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                
+                // Try to get balance and total supply (with fallback)
+                try {
+                    const balance = await contract.balanceOf(userAddress);
+                    const totalSupply = await contract.totalSupply();
+                    
+                    updateStatus(`Connected: ${userAddress.substr(0,6)}...${userAddress.substr(-4)} | Minted: ${balance}/${MAX_PER_WALLET} | Total: ${totalSupply}/10000`, false);
+                } catch (readError) {
+                    console.warn("Could not fetch stats:", readError);
+                    // Still allow minting even if stats fail
+                    updateStatus(`Connected: ${userAddress.substr(0,6)}...${userAddress.substr(-4)} | Ready to mint!`, false);
+                }
+                
+                document.getElementById('connectSection').style.display = 'none';
+                document.getElementById('mintSection').style.display = 'block';
+                
             } catch (error) {
-                hideTyping();
-                addMessage(`<span class="error-message">Error: ${error.message}</span>`);
+                console.error(error);
+                updateStatus("Initialization failed: " + error.message, true);
             }
         }
-
-        function browseDifferent() {
-            addMessage("Cancelled", true);
-            addMessage("Drop different token ID(s).");
-            state.phase = 'funded';
-            state.selectedTokenIds = [];
-        }
-
-        // Mint (handles both single and batch)
-        async function startMint() {
-            state.phase = 'minting';
-            updateStatus('MINTING...');
-            
-            const tokenIds = state.selectedTokenIds;
-            const isBatch = tokenIds.length > 1;
-            const totalCost = ethers.utils.parseEther((parseFloat(MINT_PRICE) * tokenIds.length).toString());
-            
-            addMessage(`Initiating ${isBatch ? 'batch ' : ''}mint transaction...`);
-            showTyping();
+        
+        async function mint() {
+            const input = document.getElementById('tokenInput').value.trim();
+            if (!input) {
+                updateStatus("Enter token ID(s)", true);
+                return;
+            }
             
             try {
+                updateStatus("Preparing mint...");
+                document.getElementById('mintBtn').disabled = true;
+                
+                // Parse input
+                const ids = input.includes(',') 
+                    ? input.split(',').map(s => parseInt(s.trim()))
+                    : [parseInt(input)];
+                
+                // Validate IDs
+                for (let id of ids) {
+                    if (isNaN(id) || id < 0 || id >= 10000) {
+                        updateStatus(`Invalid token ID: ${id}`, true);
+                        document.getElementById('mintBtn').disabled = false;
+                        return;
+                    }
+                }
+                
+                // Check availability
+                updateStatus("Checking availability...");
+                for (let id of ids) {
+                    try {
+                        const available = await contract.isAvailable(id);
+                        if (!available) {
+                            updateStatus(`Token #${id} already minted. Choose different ID.`, true);
+                            document.getElementById('mintBtn').disabled = false;
+                            return;
+                        }
+                    } catch (checkError) {
+                        console.warn("Availability check failed, proceeding anyway:", checkError);
+                    }
+                }
+                
+                const value = ethers.utils.parseEther((MINT_PRICE * ids.length).toString());
+                const valueInEth = (MINT_PRICE * ids.length).toFixed(4);
+                
+                updateStatus(`Confirm in wallet: ${valueInEth} ETH`);
+                
                 let tx;
                 
-                if (isBatch) {
-                    // Batch mint
-                    tx = await state.contract.mintBatch(tokenIds, {
-                        value: totalCost,
-                        gasLimit: 100000 + (tokenIds.length * 50000) // Base + per token
-                    });
-                } else {
-                    // Single mint
-                    tx = await state.contract.mint(tokenIds[0], {
-                        value: totalCost,
-                        gasLimit: 150000
-                    });
-                }
-                
-                hideTyping();
-                addMessage(`Transaction sent:<br><div class="code-block">${tx.hash}</div>Waiting for confirmation...`);
-                
-                showTyping();
-                const receipt = await tx.wait();
-                hideTyping();
-                
-                const idsDisplay = isBatch ? tokenIds.join(', ') : `#${tokenIds[0]}`;
-                const countDisplay = isBatch ? `${tokenIds.length} punks` : 'punk';
-                
-                addMessage(
-                    `<span class="success-message">✓ MINTED</span><br><br>${countDisplay.toUpperCase()} MINTED!<br><br>
-                    IDs: ${idsDisplay}<br><br>
-                    <a href="${EXPLORER}/tx/${tx.hash}" target="_blank" style="color: var(--punk-orange); text-decoration: underline;">View on Explorer</a>`,
-                    false,
-                    {
-                        tokenDisplay: tokenIds[0]
+                // Estimate gas first
+                try {
+                    let gasEstimate;
+                    if (ids.length === 1) {
+                        gasEstimate = await contract.estimateGas.mint(ids[0], { value });
+                    } else {
+                        gasEstimate = await contract.estimateGas.mintBatch(ids, { value });
                     }
-                );
-                
-                await delay(2000);
-                
-                // Check remaining balance
-                const newBalance = await state.contract.balanceOf(state.wallet.address);
-                const remaining = MAX_PER_WALLET - newBalance.toNumber();
-                
-                if (remaining > 0) {
-                    addMessage(`You have ${remaining}/${MAX_PER_WALLET} mints remaining. Want more?`);
-                    state.phase = 'funded';
-                } else {
-                    addMessage(`<span class="success-message">MAX REACHED</span><br><br>You've minted the maximum (${MAX_PER_WALLET}) from this wallet!`);
-                    state.phase = 'complete';
+                    
+                    // Add 20% buffer to gas estimate
+                    const gasLimit = gasEstimate.mul(120).div(100);
+                    
+                    if (ids.length === 1) {
+                        tx = await contract.mint(ids[0], { value, gasLimit });
+                    } else {
+                        tx = await contract.mintBatch(ids, { value, gasLimit });
+                    }
+                } catch (gasError) {
+                    console.warn("Gas estimation failed, using default gas limit:", gasError);
+                    
+                    // Fallback to hardcoded gas limit
+                    const gasLimit = ids.length === 1 ? 150000 : 100000 + (ids.length * 50000);
+                    
+                    if (ids.length === 1) {
+                        tx = await contract.mint(ids[0], { value, gasLimit });
+                    } else {
+                        tx = await contract.mintBatch(ids, { value, gasLimit });
+                    }
                 }
                 
-                state.selectedTokenIds = [];
-                updateStatus('READY', true);
+                updateStatus(`Mining tx: ${tx.hash.substr(0,10)}...`);
+                const receipt = await tx.wait();
+                
+                updateStatus(`✓ MINTED ${ids.join(', ')}! View on Etherscan ↗`, false);
+                document.getElementById('tokenInput').value = '';
+                
+                // Show etherscan link
+                setTimeout(() => {
+                    if (confirm('View transaction on Etherscan?')) {
+                        window.open(`https://etherscan.io/tx/${tx.hash}`, '_blank');
+                    }
+                }, 2000);
                 
             } catch (error) {
-                hideTyping();
-                addMessage(`<span class="error-message">Mint failed: ${error.message}</span>`);
-                state.phase = 'funded';
-                updateStatus('READY', true);
+                console.error(error);
+                if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
+                    updateStatus("Transaction rejected", true);
+                } else if (error.message.includes("insufficient funds")) {
+                    updateStatus("Insufficient ETH in wallet", true);
+                } else if (error.message.includes("already minted") || error.message.includes("TokenAlreadyMinted")) {
+                    updateStatus("Token already minted. Choose different ID.", true);
+                } else if (error.message.includes("max per wallet") || error.message.includes("MaxPerWalletReached")) {
+                    updateStatus("Max 50 per wallet reached", true);
+                } else {
+                    updateStatus("Mint failed. Check console for details.", true);
+                }
+            } finally {
+                document.getElementById('mintBtn').disabled = false;
             }
         }
-
-        // Process user messages
-        async function processUserMessage(message) {
-            const input = message.toLowerCase().trim();
-            
-            showTyping();
-            await delay(800);
-            hideTyping();
-            
-            if (state.phase === 'intro') {
-                if (input.includes('start') || input.includes('create') || input.includes('yes') || input.includes('hi')) {
-                    await createWallet();
-                } else {
-                    addMessage("Say <strong>'start'</strong> to create your mint wallet.");
-                }
-            } else if (state.phase === 'wallet_created') {
-                if (input.includes('ready') || input.includes('funded') || input.includes('check')) {
-                    await checkBalance();
-                } else {
-                    addMessage("Once you've sent ETH, say <strong>'ready'</strong> or <strong>'check balance'</strong>.");
-                }
-            } else if (state.phase === 'funded') {
-                // Handle "random X" format
-                if (input.includes('random')) {
-                    const countMatch = input.match(/random\s+(\d+)/);
-                    const count = countMatch ? parseInt(countMatch[1]) : 1;
-                    
-                    if (count > MAX_BATCH_SIZE) {
-                        addMessage(`Max ${MAX_BATCH_SIZE} per transaction.`);
+        
+        async function mintRandom() {
+            try {
+                updateStatus("Finding available token...");
+                let randomId;
+                let attempts = 0;
+                
+                do {
+                    randomId = Math.floor(Math.random() * 10000);
+                    attempts++;
+                    if (attempts > 50) {
+                        updateStatus("Couldn't find available token. Try manually.", true);
                         return;
                     }
-                    
-                    const randomIds = [];
-                    for (let i = 0; i < count; i++) {
-                        randomIds.push(Math.floor(Math.random() * 10000));
-                    }
-                    
-                    await showPunkPreview(randomIds);
-                }
-                // Handle comma-separated IDs "1,2,3,4"
-                else if (input.includes(',')) {
-                    const ids = input.split(',')
-                        .map(s => s.trim())
-                        .filter(s => /^\d+$/.test(s))
-                        .map(s => parseInt(s))
-                        .filter(id => id >= 0 && id < 10000);
-                    
-                    if (ids.length === 0) {
-                        addMessage("Invalid format. Use: <strong>1,2,3,4</strong>");
-                        return;
-                    }
-                    
-                    if (ids.length > MAX_BATCH_SIZE) {
-                        addMessage(`Max ${MAX_BATCH_SIZE} per transaction.`);
-                        return;
-                    }
-                    
-                    await showPunkPreview(ids);
-                }
-                // Handle single token ID
-                else {
-                    const tokenMatch = input.match(/\d+/);
-                    if (tokenMatch) {
-                        const tokenId = parseInt(tokenMatch[0]);
-                        if (tokenId >= 0 && tokenId < 10000) {
-                            await showPunkPreview([tokenId]);
-                        } else {
-                            addMessage("Token ID must be 0-9999.");
-                        }
-                    } else {
-                        addMessage("Examples:<br>• Single: <strong>420</strong><br>• Multiple: <strong>1,2,3</strong><br>• Random: <strong>random 5</strong>");
-                    }
-                }
-            } else if (state.phase === 'confirming') {
-                if (input.includes('yes') || input.includes('mint')) {
-                    await startMint();
-                } else if (input.includes('no') || input.includes('cancel')) {
-                    browseDifferent();
-                } else {
-                    addMessage("Say <strong>'yes'</strong> to mint or <strong>'cancel'</strong>.");
-                }
+                } while (!(await contract.isAvailable(randomId)));
+                
+                document.getElementById('tokenInput').value = randomId;
+                await mint();
+            } catch (error) {
+                updateStatus("Error: " + error.message, true);
             }
         }
-
-        function sendMessage() {
-            console.log('sendMessage called');
-            const input = document.getElementById('userInput');
-            const message = input.value.trim();
-            
-            console.log('Message:', message);
-            
-            if (!message) {
-                console.log('Empty message, returning');
-                return;
+        
+        async function disconnect() {
+            if (web3Provider) {
+                await web3Provider.disconnect();
             }
             
-            addMessage(message, true);
-            input.value = '';
+            provider = null;
+            signer = null;
+            contract = null;
+            userAddress = null;
+            web3Provider = null;
             
-            console.log('Processing message...');
-            processUserMessage(message);
+            document.getElementById('connectSection').style.display = 'block';
+            document.getElementById('mintSection').style.display = 'none';
+            
+            updateStatus("Connect your wallet to start");
         }
-
-        function handleKeyPress(event) {
-            console.log('Key pressed:', event.key);
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                sendMessage();
-            }
+        
+        function updateStatus(text, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = text;
+            status.className = 'status ' + (isError ? 'error' : text.includes('✓') ? 'success' : '');
         }
-
-        // Initialize
-        window.addEventListener('load', async () => {
-            console.log('Page loaded, initializing...');
+        
+        // Auto-connect if previously connected
+        if (window.ethereum && window.ethereum.selectedAddress) {
+            connectMetaMask();
+        }
+        
+        // Listen for account/network changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0 && !web3Provider) {
+                    connectMetaMask();
+                } else if (accounts.length === 0) {
+                    disconnect();
+                }
+            });
             
-            // Test that elements exist
-            const input = document.getElementById('userInput');
-            const sendBtn = document.getElementById('sendBtn');
-            console.log('Input element:', input);
-            console.log('Send button:', sendBtn);
-            
-            // Check if ethers loaded
-            console.log('Ethers.js loaded:', typeof ethers !== 'undefined');
-            if (typeof ethers !== 'undefined') {
-                console.log('Ethers version:', ethers.version);
-            }
-            
-            await delay(500);
-            
-            if (typeof ethers === 'undefined') {
-                addMessage(`<div class="warning-box">⚠️ LIBRARY LOADING ERROR</div>
-                    <span class="error-message">Ethers.js failed to load.</span><br><br>
-                    This usually means:<br>
-                    • Your internet connection is slow/blocked<br>
-                    • Ad blocker is interfering<br>
-                    • CDN is blocked in your region<br><br>
-                    <strong>Try:</strong><br>
-                    1. Refresh the page<br>
-                    2. Disable ad blockers<br>
-                    3. Try a different browser<br>
-                    4. Check internet connection`);
-            } else {
-                addMessage(`<div class="warning-box">🔥 ETHEREUM MAINNET - REAL NFTs<br><br>Price: 0.0005 ETH per punk ($1)</div>Yo. I'm the Pixels AI.<br><br>I'll create a wallet for you, guide you through funding with real ETH, then mint your punks.<br><br>Ready to start? Say <strong>'yes'</strong>.`);
-            }
-            
-            console.log('Initialization complete');
-        });
+            window.ethereum.on('chainChanged', () => {
+                window.location.reload();
+            });
+        }
     </script>
 </body>
 </html>
