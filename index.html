@@ -404,8 +404,8 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
     <script>
-        // CONTRACT CONFIGURATION
-        const CONTRACT_ADDRESS = "0x1D2b6046585602E754414f883e2989a68A0D049f";
+        // CONTRACT CONFIGURATION - V2 SETTINGS
+        const CONTRACT_ADDRESS = "0x..."; // UPDATE AFTER DEPLOYMENT
         const CONTRACT_ABI = [
             "function mint(uint256 tokenId) public payable",
             "function mintBatch(uint256[] memory tokenIds) public payable",
@@ -414,9 +414,10 @@
             "function totalSupply() public view returns (uint256)"
         ];
         
-        const MINT_PRICE = "0.0005";
-        const MAX_PER_WALLET = 50;
-        const MAX_BATCH_SIZE = 50;
+        const MINT_PRICE = "0.0003"; // 0.0003 ETH
+        const MAX_PER_WALLET = 100;
+        const MAX_BATCH_SIZE = 100;
+        const MAX_SUPPLY = 3333;
         const EXPLORER = "https://etherscan.io";
 
         // State
@@ -617,7 +618,7 @@
                     const remaining = MAX_PER_WALLET - balance.toNumber();
                     
                     hideTyping();
-                    addMessage(`<span class="success-message">✓ WALLET CONNECTED</span><br><br>Address: ${state.userAddress.substr(0,6)}...${state.userAddress.substr(-4)}<br>Already minted: ${balance}/${MAX_PER_WALLET}<br>Can mint: ${remaining} more<br><br>Tell me token ID(s). Examples:<br>• Single: <strong>"420"</strong><br>• Multiple: <strong>"1,2,3,4,5"</strong><br>• Random: <strong>"random 5"</strong>`);
+                    addMessage(`<span class="success-message">✓ WALLET CONNECTED</span><br><br>Address: ${state.userAddress.substr(0,6)}...${state.userAddress.substr(-4)}<br>Already minted: ${balance}/${MAX_PER_WALLET}<br>Can mint: ${remaining} more<br><br>Price: <strong>FREE</strong> (gas only)<br><br>Tell me token ID(s). Examples:<br>• Single: <strong>"420"</strong><br>• Multiple: <strong>"1,2,3,4,5"</strong><br>• Random: <strong>"random 5"</strong>`);
                     
                     state.phase = 'ready';
                     updateStatus('READY');
@@ -666,8 +667,8 @@
                 const isBatch = tokenIds.length > 1;
                 
                 let message = isBatch 
-                    ? `Ready to mint <strong>${tokenIds.length} pixels</strong>?<br><br>IDs: ${tokenIds.join(', ')}<br>Total: <strong>${totalCost} ETH</strong>` 
-                    : `Ready to mint <strong>Pixel #${tokenIds[0]}</strong>?<br><br>Price: <strong>${MINT_PRICE} ETH</strong>`;
+                    ? `Ready to mint <strong>${tokenIds.length} pixels</strong>?<br><br>IDs: ${tokenIds.join(', ')}<br>Price: <strong>FREE</strong> (gas only)` 
+                    : `Ready to mint <strong>Pixel #${tokenIds[0]}</strong>?<br><br>Price: <strong>FREE</strong> (gas only)`;
                 
                 addMessage(
                     message,
@@ -710,12 +711,12 @@
                 if (isBatch) {
                     tx = await state.contract.mintBatch(tokenIds, {
                         value: totalCost,
-                        gasLimit: 100000 + (tokenIds.length * 50000)
+                        gasLimit: 150000 + (tokenIds.length * 50000)
                     });
                 } else {
                     tx = await state.contract.mint(tokenIds[0], {
                         value: totalCost,
-                        gasLimit: 150000
+                        gasLimit: 200000
                     });
                 }
                 
@@ -804,7 +805,7 @@
                     
                     const randomIds = [];
                     for (let i = 0; i < count; i++) {
-                        randomIds.push(Math.floor(Math.random() * 10000));
+                        randomIds.push(Math.floor(Math.random() * MAX_SUPPLY));
                     }
                     
                     await showPunkPreview(randomIds);
@@ -814,7 +815,7 @@
                         .map(s => s.trim())
                         .filter(s => /^\d+$/.test(s))
                         .map(s => parseInt(s))
-                        .filter(id => id >= 0 && id < 10000);
+                        .filter(id => id >= 0 && id < MAX_SUPPLY);
                     
                     if (ids.length === 0) {
                         addMessage("Invalid format. Use: <strong>1,2,3,4</strong>");
@@ -832,10 +833,10 @@
                     const tokenMatch = input.match(/\d+/);
                     if (tokenMatch) {
                         const tokenId = parseInt(tokenMatch[0]);
-                        if (tokenId >= 0 && tokenId < 10000) {
+                        if (tokenId >= 0 && tokenId < MAX_SUPPLY) {
                             await showPunkPreview([tokenId]);
                         } else {
-                            addMessage("Token ID must be 0-9999.");
+                            addMessage(`Token ID must be 0-${MAX_SUPPLY - 1}.`);
                         }
                     } else {
                         addMessage("Examples:<br>• Single: <strong>420</strong><br>• Multiple: <strong>1,2,3</strong><br>• Random: <strong>random 5</strong>");
@@ -855,7 +856,7 @@
         // Initialize
         window.addEventListener('load', async () => {
             await delay(500);
-            addMessage(`Yo. I'm the Pixels AI.<br><br>Connect your wallet to mint pixels.<br><br>Price: <strong>0.0005 ETH</strong> per pixel<br>Max: <strong>50</strong> per wallet<br><br>Ready? Say <strong>'connect'</strong>.`);
+            addMessage(`Yo. I'm the Pixels AI.<br><br>Connect your wallet to mint pixels.<br><br>Price: <strong>FREE</strong> (gas only)<br>Max: <strong>100</strong> per wallet<br>Supply: <strong>3,333</strong> total<br><br>Ready? Say <strong>'connect'</strong>.`);
         });
     </script>
 </body>
